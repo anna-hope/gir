@@ -457,6 +457,13 @@ fn generate_builder(w: &mut dyn Write, env: &Env, analysis: &analysis::object::I
         name = analysis.name,
     )?;
 
+    // Add a check to panic if GTK has not been initialized
+    // (otherwise the caller could get a segfault)
+
+    writeln!(w, "    if !crate::rt::is_initialized {{")?;
+    writeln!(w, "        panic!(\"GTK has to be initialized first\");")?;
+    writeln!(w, "    }}\n")?;
+
     // The split allows us to not have clippy::let_and_return lint disabled
     if let Some(code) = analysis.builder_postprocess.as_ref() {
         writeln!(w, "    let ret = self.builder.build();")?;
